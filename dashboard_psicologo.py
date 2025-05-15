@@ -4,7 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Cargar datos desde CSV
-df = pd.read_csv("datos_psicologos_pacientes.csv")
+#df = pd.read_csv("datos_psicologos_pacientes.csv")
+df = pd.read_excel("datos_psicologos_pacientes.xlsx")
 
 st.title("🧠 Dashboard de Seguimiento Terapéutico")
 
