@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -14,7 +15,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🧠 Dashboard Terapéutico con Formulario")
-st.markdown("Visualización + carga manual de sesiones. (versión XLSX)")
+st.markdown("Visualización + carga manual de sesiones. (versión XLSX corregida)")
 
 # Cargar datos existentes
 xlsx_file = "datos_psicologos_pacientes.xlsx"
@@ -25,6 +26,10 @@ else:
         "Paciente", "Fecha", "Estado emocional (1-10)",
         "Tema trabajado", "Compromisos asumidos", "Cumplido"
     ])
+
+# Corregir formato de fechas
+df["Fecha"] = pd.to_datetime(df["Fecha"], errors="coerce")
+df = df.dropna(subset=["Fecha"])  # Elimina filas sin fecha válida
 
 # Selector de paciente
 pacientes = df["Paciente"].unique().tolist()
@@ -47,7 +52,7 @@ with st.expander("➕ Registrar nueva sesión"):
         if submit and seleccion:
             nueva_fila = pd.DataFrame([{
                 "Paciente": seleccion,
-                "Fecha": fecha.strftime("%Y-%m-%d"),
+                "Fecha": pd.to_datetime(fecha),
                 "Estado emocional (1-10)": estado,
                 "Tema trabajado": tema,
                 "Compromisos asumidos": compromiso,
@@ -59,7 +64,7 @@ with st.expander("➕ Registrar nueva sesión"):
 
 # Mostrar dashboard si hay datos
 if seleccion in df["Paciente"].unique():
-    df_filtrado = df[df["Paciente"] == seleccion]
+    df_filtrado = df[df["Paciente"] == seleccion].sort_values("Fecha")
 
     col1, col2, col3 = st.columns(3)
     col1.metric("Sesiones", len(df_filtrado))
@@ -80,9 +85,9 @@ if seleccion in df["Paciente"].unique():
         st.dataframe(df_filtrado[["Fecha", "Tema trabajado", "Cumplido"]], use_container_width=True)
 
     st.markdown("---")
-    ultima = df_filtrado.sort_values("Fecha").iloc[-1]
+    ultima = df_filtrado.iloc[-1]
     st.markdown("### 🧠 Última sesión")
-    st.markdown(f"🗓️ Fecha: **{ultima['Fecha']}**")
+    st.markdown(f"🗓️ Fecha: **{ultima['Fecha'].strftime('%Y-%m-%d')}**")
     st.markdown(f"💬 Tema: _{ultima['Tema trabajado']}_")
     st.markdown(f"📌 Compromiso: {ultima['Compromisos asumidos']}")
     st.markdown(f"✅ Cumplido: **{ultima['Cumplido']}**")
